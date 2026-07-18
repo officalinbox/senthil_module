@@ -1,0 +1,18 @@
+{
+  "description": "Performs system prechecks for memory space, disk capacity, and connection ports.",
+  "input_method": "environment",
+  "supports_noop": true,
+  "parameters": {
+    "min_memory_gb": {
+      "description": "Minimum required free memory on the host system in gigabytes.",
+      "type": "Integer",
+      "default": 2
+    },
+    "check_network": {
+      "description": "Set to true to validate outgoing connectivity to external updates.",
+      "type": "Boolean",
+      "default": false
+    }
+  }
+}
+
