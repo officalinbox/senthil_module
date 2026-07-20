@@ -2,6 +2,10 @@
   "description": "Performs storage provisioning, mounts, packages, and host configuration for RHEL 8/9",
   "input_method": "environment",
   "parameters": {
+    "action_type": {
+      "type": "Enum['create_storage', 'extend_lv', 'generic']",
+      "description": "Task mode: 'create_storage' (sequential flow), 'extend_lv' (LVM resize), or 'generic' (runs individual items based on passed parameters)"
+    },
     "pv_device": {
       "type": "Optional[String]",
       "description": "Disk device for PV (e.g. /dev/sdb)"
@@ -18,10 +22,6 @@
       "type": "Optional[String]",
       "description": "Size for creation or extension (e.g. 5G or +2G)"
     },
-    "action_type": {
-      "type": "Enum['create_storage', 'extend_lv']",
-      "description": "Storage action: create_storage or extend_lv"
-    },
     "fstype": {
       "type": "Optional[String]",
       "description": "Filesystem type (default: xfs)"
@@ -30,17 +30,33 @@
       "type": "Optional[String]",
       "description": "Mount point path (e.g. /data)"
     },
+    "do_umount": {
+      "type": "Optional[Boolean]",
+      "description": "If true, unmounts mount_path (generic mode)"
+    },
+    "do_mount_all": {
+      "type": "Optional[Boolean]",
+      "description": "If true, runs mount -a (generic mode)"
+    },
+    "do_daemon_reload": {
+      "type": "Optional[Boolean]",
+      "description": "If true, runs systemctl daemon-reload (generic mode)"
+    },
+    "add_fstab_entry": {
+      "type": "Optional[Boolean]",
+      "description": "If true, adds /etc/fstab entry using vg_name, lv_name, mount_path, and fstype (generic mode)"
+    },
     "file_owner": {
       "type": "Optional[String]",
-      "description": "Owner for the target directory/file"
+      "description": "Owner for mount_path or target directory/file"
     },
     "file_group": {
       "type": "Optional[String]",
-      "description": "Group for the target directory/file"
+      "description": "Group for mount_path or target directory/file"
     },
     "file_mode": {
       "type": "Optional[String]",
-      "description": "Permissions mode (e.g. 0755)"
+      "description": "Permissions mode as String (e.g. '0755')"
     },
     "hosts_entry": {
       "type": "Optional[String]",
