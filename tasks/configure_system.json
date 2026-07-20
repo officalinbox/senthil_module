@@ -1,6 +1,6 @@
 {
   "name": "your_module::configure_system",
-  "description": "RHEL 8 / RHEL 9 - Package, LVM, Mount, chown/chmod, IP, hosts with real server output",
+  "description": "RHEL 8/9 - Package, LVM, Mount, chown/chmod, IP, hosts with real output",
   "input_method": "environment",
   "parameters": {
     "package": {
@@ -28,15 +28,15 @@
       "type": "Optional[String]"
     },
     "chown": {
-      "description": "Owner:Group format (e.g. root:root, appuser:apps)",
+      "description": "Owner:Group (e.g. root:root, appuser:apps)",
       "type": "Optional[String]"
     },
     "permissions": {
-      "description": "Permissions (e.g. 755, 775, 700)",
+      "description": "Permissions (e.g. 755, 775)",
       "type": "Optional[String]"
     },
     "ip_address": {
-      "description": "Static IP with CIDR (e.g. 192.168.10.50/24)",
+      "description": "Static IP (e.g. 192.168.10.50/24)",
       "type": "Optional[String]"
     },
     "interface": {
@@ -44,7 +44,7 @@
       "type": "Optional[String]"
     },
     "hosts_entry": {
-      "description": "Line to add to /etc/hosts (e.g. 192.168.1.100 myserver)",
+      "description": "Line to add in /etc/hosts",
       "type": "Optional[String]"
     }
   }

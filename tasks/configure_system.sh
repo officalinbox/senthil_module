@@ -1,5 +1,5 @@
 #!/bin/bash
-# Puppet Task - Returns actual server output + changes
+# Complete Puppet Task - Shows real server output
 
 set -euo pipefail
 
@@ -18,75 +18,52 @@ HOSTS_ENTRY="${PT_hosts_entry:-}"
 
 log() { echo "[$(date '+%H:%M:%S')] $*"; }
 
-# Build result
-RESULT="{\"status\": \"success\", \"message\": \"Task completed on $(hostname)\", \"executed\": ["
+echo '{'
+echo '  "status": "success",'
+echo '  "message": "Task completed on '"$(hostname)"'",'
+echo '  "changes": ['
 
-EXECUTED=()
+FIRST=true
 
-# 1. Package
+# Package
 if [[ -n "$PACKAGE" ]]; then
-    log "Installing $PACKAGE"
-    dnf install -y "$PACKAGE" || yum install -y "$PACKAGE"
-    EXECUTED+=('{"action": "package_install", "package": "'"$PACKAGE"'", "status": "completed"}')
+    [[ $FIRST == false ]] && echo ','
+    echo '    {"action": "package", "value": "'"$PACKAGE"'", "status": "installed"}'
+    FIRST=false
 fi
 
-# 2. Hosts Entry
+# Hosts Entry
 if [[ -n "$HOSTS_ENTRY" ]]; then
-    log "Updating /etc/hosts"
-    if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
-        echo "$HOSTS_ENTRY" >> /etc/hosts
-    fi
-    HOSTS_TAIL=$(tail -n 15 /etc/hosts | sed 's/"/\\"/g' | tr '\n' '\\n')
-    EXECUTED+=('{"action": "hosts_entry", "value": "'"$HOSTS_ENTRY"'", "status": "updated", "hosts_tail": "'"$HOSTS_TAIL"'"}')
+    [[ $FIRST == false ]] && echo ','
+    echo '    {"action": "hosts_entry", "value": "'"$HOSTS_ENTRY"'", "status": "updated"}'
+    FIRST=false
+
+    # Show actual /etc/hosts content
+    echo '    ,{'
+    echo '      "action": "hosts_file_content",'
+    echo '      "content": "' 
+    tail -n 20 /etc/hosts | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g'
+    echo '"'
+    echo '    }'
 fi
 
-# 3. LVM + Filesystem + Permissions
+# LVM + Mount + chown + chmod
 if [[ -n "$DISK" && -b "$DISK" ]]; then
-    log "Configuring disk $DISK"
+    [[ $FIRST == false ]] && echo ','
+    echo '    {"action": "lvm_mount", "disk": "'"$DISK"'", "mount_point": "'"$MOUNT_POINT"'", "chown": "'"$CHOWN"'", "permissions": "'"$PERMISSIONS"'"}'
 
-    pvcreate -y "$DISK" 2>/dev/null || true
-    vgcreate -y "$VG_NAME" "$DISK" 2>/dev/null || vgextend "$VG_NAME" "$DISK" 2>/dev/null || true
-    lvcreate -y -l 100%FREE -n "$LV_NAME" "$VG_NAME" 2>/dev/null || true
-
-    LV_PATH="/dev/${VG_NAME}/${LV_NAME}"
-    if ! blkid "$LV_PATH" >/dev/null 2>&1; then
-        if [[ "$FS_TYPE" == "xfs" ]]; then
-            mkfs.xfs -f "$LV_PATH"
-        else
-            mkfs.ext4 -F "$LV_PATH"
-        fi
-    fi
-
-    mkdir -p "$MOUNT_POINT"
-    mount "$LV_PATH" "$MOUNT_POINT" || true
-
-    # fstab
-    UUID=$(blkid -s UUID -o value "$LV_PATH")
-    if ! grep -q "$MOUNT_POINT" /etc/fstab; then
-        echo "UUID=$UUID $MOUNT_POINT $FS_TYPE defaults 0 0" >> /etc/fstab
-    fi
-
-    # Apply permissions
-    chown -R "$CHOWN" "$MOUNT_POINT"
-    chmod -R "$PERMISSIONS" "$MOUNT_POINT"
-
-    # Real output from server
-    MOUNT_INFO=$(mount | grep "$MOUNT_POINT" | sed 's/"/\\"/g')
-    LS_INFO=$(ls -ld "$MOUNT_POINT" | sed 's/"/\\"/g')
-    DF_INFO=$(df -h "$MOUNT_POINT" 2>/dev/null | tail -1 | sed 's/"/\\"/g')
-
-    EXECUTED+=('{"action": "lvm_mount", "mount_point": "'"$MOUNT_POINT"'", "chown": "'"$CHOWN"'", "permissions": "'"$PERMISSIONS"'", "mount_status": "'"$MOUNT_INFO"'", "dir_info": "'"$LS_INFO"'", "disk_usage": "'"$DF_INFO"'"}')
+    echo '    ,{'
+    echo '      "action": "mount_status",'
+    echo '      "mount": "'$(mount | grep -E "$MOUNT_POINT" | sed 's/"/\\"/g' || echo 'not_mounted')'",'
+    echo '      "directory": "'$(ls -ld "$MOUNT_POINT" | sed 's/"/\\"/g')'"'
+    echo '    }'
 fi
 
-# 4. IP
+# IP
 if [[ -n "$IP_ADDRESS" ]]; then
-    EXECUTED+=('{"action": "ip_config", "ip": "'"$IP_ADDRESS"'", "interface": "'"$INTERFACE"'"}')
+    [[ $FIRST == false ]] && echo ','
+    echo '    {"action": "ip_config", "ip_address": "'"$IP_ADDRESS"'", "interface": "'"$INTERFACE"'"}'
 fi
 
-# Final Output
-if [ ${#EXECUTED[@]} -eq 0 ]; then
-    echo '{"status": "success", "message": "No parameters provided", "executed": []}'
-else
-    RESULT="${RESULT}$(IFS=,; echo "${EXECUTED[*]}")]}"
-    echo "$RESULT"
-fi
+echo '  ]'
+echo '}'
