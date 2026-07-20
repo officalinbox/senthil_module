@@ -1,6 +1,6 @@
 {
   "name": "your_module::configure_system",
-  "description": "RHEL 8/9 - Package, LVM, Filesystem, IP, Hosts, fstab configuration",
+  "description": "RHEL 8 / RHEL 9 - Package, LVM, Mount, chown/chmod, IP, hosts with real server output",
   "input_method": "environment",
   "parameters": {
     "package": {
@@ -8,7 +8,7 @@
       "type": "Optional[String]"
     },
     "disk": {
-      "description": "Disk device for LVM (e.g. /dev/sdb)",
+      "description": "Disk for LVM (e.g. /dev/sdb)",
       "type": "Optional[String]"
     },
     "vg_name": {
@@ -20,27 +20,31 @@
       "type": "Optional[String]"
     },
     "mount_point": {
-      "description": "Mount point for new filesystem (e.g. /data)",
+      "description": "Mount point (e.g. /data)",
       "type": "Optional[String]"
     },
     "fs_type": {
-      "description": "Filesystem type - xfs or ext4",
+      "description": "Filesystem type (xfs or ext4)",
+      "type": "Optional[String]"
+    },
+    "chown": {
+      "description": "Owner:Group format (e.g. root:root, appuser:apps)",
+      "type": "Optional[String]"
+    },
+    "permissions": {
+      "description": "Permissions (e.g. 755, 775, 700)",
       "type": "Optional[String]"
     },
     "ip_address": {
-      "description": "Static IP with prefix (e.g. 192.168.10.50/24)",
-      "type": "Optional[String]"
-    },
-    "gateway": {
-      "description": "Gateway IP address",
+      "description": "Static IP with CIDR (e.g. 192.168.10.50/24)",
       "type": "Optional[String]"
     },
     "interface": {
-      "description": "Network interface (e.g. ens18, eth0)",
+      "description": "Network interface (e.g. ens18)",
       "type": "Optional[String]"
     },
     "hosts_entry": {
-      "description": "Line to add in /etc/hosts (e.g. 192.168.1.100 myserver)",
+      "description": "Line to add to /etc/hosts (e.g. 192.168.1.100 myserver)",
       "type": "Optional[String]"
     }
   }
