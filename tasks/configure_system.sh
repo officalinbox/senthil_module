@@ -1,9 +1,9 @@
 #!/bin/bash
-# Simple Puppet Task - Minimal Output
+# Compact Single Line JSON Output
 
 set -euo pipefail
 
-# Get parameters from Puppet
+# Parameters
 PACKAGE="${PT_package:-}"
 DISK="${PT_disk:-}"
 MOUNT_POINT="${PT_mount_point:-/data}"
@@ -13,7 +13,7 @@ IP_ADDRESS="${PT_ip_address:-}"
 INTERFACE="${PT_interface:-}"
 HOSTS_ENTRY="${PT_hosts_entry:-}"
 
-# Perform actions (silent)
+# Execute actions
 if [[ -n "$PACKAGE" ]]; then
     dnf install -y "$PACKAGE" || yum install -y "$PACKAGE"
 fi
@@ -34,15 +34,13 @@ if [[ -n "$DISK" && -b "$DISK" ]]; then
     LV_PATH="/dev/$VG_NAME/$LV_NAME"
     mkdir -p "$MOUNT_POINT"
     mount "$LV_PATH" "$MOUNT_POINT" 2>/dev/null || true
-
     chown -R "$CHOWN" "$MOUNT_POINT" 2>/dev/null || true
     chmod -R "$PERMISSIONS" "$MOUNT_POINT" 2>/dev/null || true
 fi
 
-# Minimal Output
-cat <<EOF
-{
-  "status": "success",
-  "message": "Task completed successfully on $(hostname)"
-}
-EOF
+# Compact Single Line Output
+if [[ -n "$HOSTS_ENTRY" ]]; then
+    echo "{\"status\": \"success\", \"message\": \"Task completed on $(hostname)\", \"hosts_entry\": \"$HOSTS_ENTRY\", \"hosts_updated\": true }"
+else
+    echo "{\"status\": \"success\", \"message\": \"Task completed on $(hostname)\" }"
+fi

@@ -1,6 +1,6 @@
 {
   "name": "your_module::configure_system",
-  "description": "Simple RHEL 8/9 Configuration Task",
+  "description": "RHEL 8/9 Simple Configuration Task",
   "input_method": "environment",
   "parameters": {
     "package": {
