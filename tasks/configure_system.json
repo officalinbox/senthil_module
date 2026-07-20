@@ -1,38 +1,38 @@
 {
   "name": "your_module::configure_system",
-  "description": "RHEL 8/9 System Configuration Task - Package, LVM, Mount, chown, hosts, IP",
+  "description": "Simple RHEL 8/9 Configuration Task",
   "input_method": "environment",
   "parameters": {
     "package": {
-      "description": "Package to install (e.g. httpd, nfs-utils)",
+      "description": "Package to install",
       "type": "Optional[String]"
     },
     "disk": {
-      "description": "Disk device for LVM (e.g. /dev/sdb)",
+      "description": "Disk for LVM (e.g. /dev/sdb)",
       "type": "Optional[String]"
     },
     "mount_point": {
-      "description": "Mount point directory (e.g. /data)",
+      "description": "Mount point (e.g. /data)",
       "type": "Optional[String]"
     },
     "chown": {
-      "description": "Owner in user:group format (e.g. root:root or appuser:apps)",
+      "description": "user:group (e.g. root:root)",
       "type": "Optional[String]"
     },
     "permissions": {
-      "description": "Permissions (e.g. 755, 775, 700)",
+      "description": "Permissions (e.g. 755)",
       "type": "Optional[String]"
     },
     "ip_address": {
-      "description": "Static IP address with prefix (e.g. 192.168.10.50/24)",
+      "description": "Static IP (e.g. 192.168.1.100/24)",
       "type": "Optional[String]"
     },
     "interface": {
-      "description": "Network interface name (e.g. ens18)",
+      "description": "Network interface",
       "type": "Optional[String]"
     },
     "hosts_entry": {
-      "description": "Line to add in /etc/hosts (e.g. 192.168.1.100 myserver)",
+      "description": "Line to add in /etc/hosts",
       "type": "Optional[String]"
     }
   }

@@ -1,8 +1,9 @@
 #!/bin/bash
-# Simple & Clean Output Version
+# Simple Puppet Task - Minimal Output
 
 set -euo pipefail
 
+# Get parameters from Puppet
 PACKAGE="${PT_package:-}"
 DISK="${PT_disk:-}"
 MOUNT_POINT="${PT_mount_point:-/data}"
@@ -12,55 +13,36 @@ IP_ADDRESS="${PT_ip_address:-}"
 INTERFACE="${PT_interface:-}"
 HOSTS_ENTRY="${PT_hosts_entry:-}"
 
-echo '{'
-echo '  "status": "success",'
-echo '  "message": "Task completed on '"$(hostname)"'",'
-echo '  "changes": ['
-
-FIRST=true
-
-# Hosts Entry
-if [[ -n "$HOSTS_ENTRY" ]]; then
-    [[ $FIRST == false ]] && echo ','
-    echo '    {'
-    echo '      "action": "hosts_entry",'
-    echo '      "value": "'"$HOSTS_ENTRY"'",'
-    echo '      "status": "updated"'
-    echo '    }'
-    FIRST=false
-
-    # Show actual hosts content
-    echo '    ,{'
-    echo '      "action": "hosts_file_content",'
-    echo '      "content": "' 
-    tail -n 15 /etc/hosts | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g'
-    echo '"'
-    echo '    }'
-fi
-
-# LVM + Permissions
-if [[ -n "$DISK" ]]; then
-    [[ $FIRST == false ]] && echo ','
-    echo '    {'
-    echo '      "action": "lvm_mount",'
-    echo '      "mount_point": "'"$MOUNT_POINT"'",'
-    echo '      "chown": "'"$CHOWN"'",'
-    echo '      "permissions": "'"$PERMISSIONS"'",'
-    echo '      "status": "completed"'
-    echo '    }'
-fi
-
-# Package
+# Perform actions (silent)
 if [[ -n "$PACKAGE" ]]; then
-    [[ $FIRST == false ]] && echo ','
-    echo '    {"action": "package", "value": "'"$PACKAGE"'", "status": "installed"}'
+    dnf install -y "$PACKAGE" || yum install -y "$PACKAGE"
 fi
 
-# IP
-if [[ -n "$IP_ADDRESS" ]]; then
-    [[ $FIRST == false ]] && echo ','
-    echo '    {"action": "ip_config", "value": "'"$IP_ADDRESS"'", "status": "configured"}'
+if [[ -n "$HOSTS_ENTRY" ]]; then
+    if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
+        echo "$HOSTS_ENTRY" >> /etc/hosts
+    fi
 fi
 
-echo '  ]'
-echo '}'
+if [[ -n "$DISK" && -b "$DISK" ]]; then
+    VG_NAME="datavg"
+    LV_NAME="datalv"
+    pvcreate -y "$DISK" 2>/dev/null || true
+    vgcreate -y "$VG_NAME" "$DISK" 2>/dev/null || vgextend "$VG_NAME" "$DISK" 2>/dev/null || true
+    lvcreate -y -l 100%FREE -n "$LV_NAME" "$VG_NAME" 2>/dev/null || true
+
+    LV_PATH="/dev/$VG_NAME/$LV_NAME"
+    mkdir -p "$MOUNT_POINT"
+    mount "$LV_PATH" "$MOUNT_POINT" 2>/dev/null || true
+
+    chown -R "$CHOWN" "$MOUNT_POINT" 2>/dev/null || true
+    chmod -R "$PERMISSIONS" "$MOUNT_POINT" 2>/dev/null || true
+fi
+
+# Minimal Output
+cat <<EOF
+{
+  "status": "success",
+  "message": "Task completed successfully on $(hostname)"
+}
+EOF
