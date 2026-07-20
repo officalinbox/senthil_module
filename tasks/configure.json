@@ -1,0 +1,60 @@
+{
+  "name": "your_module::configure_system",
+  "description": "Install package, configure LVM (VG/LV), extend filesystem, update fstab/hosts, configure IP - RHEL 8/9",
+  "input_method": "environment",
+  "parameters": {
+    "package": {
+      "description": "Package to install (e.g. nfs-utils, httpd)",
+      "type": "Optional[String]"
+    },
+    "disk": {
+      "description": "Disk device for LVM (e.g. /dev/sdb)",
+      "type": "Optional[String]"
+    },
+    "vg_name": {
+      "description": "Volume Group name",
+      "type": "Optional[String]",
+      "default": "datavg"
+    },
+    "lv_name": {
+      "description": "Logical Volume name",
+      "type": "Optional[String]",
+      "default": "datalv"
+    },
+    "new_lv_name": {
+      "description": "New name to rename LV",
+      "type": "Optional[String]"
+    },
+    "mount_point": {
+      "description": "Mount point for the LV",
+      "type": "Optional[String]",
+      "default": "/data"
+    },
+    "fs_type": {
+      "description": "Filesystem type (xfs or ext4)",
+      "type": "Optional[String]",
+      "default": "xfs"
+    },
+    "lv_size": {
+      "description": "LV size (e.g. 50G or 100%FREE)",
+      "type": "Optional[String]",
+      "default": "100%FREE"
+    },
+    "ip_address": {
+      "description": "Static IP with prefix (e.g. 192.168.10.50/24)",
+      "type": "Optional[String]"
+    },
+    "gateway": {
+      "description": "Gateway IP",
+      "type": "Optional[String]"
+    },
+    "interface": {
+      "description": "Network interface (e.g. ens18)",
+      "type": "Optional[String]"
+    },
+    "hosts_entry": {
+      "description": "Line to add to /etc/hosts",
+      "type": "Optional[String]"
+    }
+  }
+}
