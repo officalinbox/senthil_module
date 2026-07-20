@@ -1,63 +1,57 @@
 #!/bin/bash
-# Puppet Task: RHEL 8/9 Configuration
+# Puppet Task: Clean output - Only show used parameters
 
 set -euo pipefail
 
-# === Get parameters from Puppet ===
+# Parameters from Puppet Console
 PACKAGE="${PT_package:-}"
 DISK="${PT_disk:-}"
-VG_NAME="${PT_vg_name:-datavg}"
-LV_NAME="${PT_lv_name:-datalv}"
-MOUNT_POINT="${PT_mount_point:-/data}"
-FS_TYPE="${PT_fs_type:-xfs}"
+VG_NAME="${PT_vg_name:-}"
+LV_NAME="${PT_lv_name:-}"
+MOUNT_POINT="${PT_mount_point:-}"
+FS_TYPE="${PT_fs_type:-}"
 IP_ADDRESS="${PT_ip_address:-}"
 INTERFACE="${PT_interface:-}"
 HOSTS_ENTRY="${PT_hosts_entry:-}"
 
 log() { echo "[$(date '+%H:%M:%S')] $*"; }
 
-RESULTS=""
+# Build dynamic JSON output
+JSON_OUTPUT='{"status": "success", "message": "Task completed on '"$(hostname)"'", '
 
-# 1. Package
+# Package
 if [[ -n "$PACKAGE" ]]; then
-    log "Installing $PACKAGE"
+    log "Installing package: $PACKAGE"
     dnf install -y "$PACKAGE" || yum install -y "$PACKAGE"
-    RESULTS="${RESULTS}\"package_installed\": true, "
-else
-    RESULTS="${RESULTS}\"package_installed\": false, "
+    JSON_OUTPUT="${JSON_OUTPUT}\"package_installed\": true, "
 fi
 
-# 2. Hosts Entry (This was broken before)
+# Hosts Entry
 if [[ -n "$HOSTS_ENTRY" ]]; then
     log "Adding to /etc/hosts: $HOSTS_ENTRY"
     if ! grep -qF "$HOSTS_ENTRY" /etc/hosts; then
         echo "$HOSTS_ENTRY" >> /etc/hosts
-        log "Successfully added hosts entry"
-        RESULTS="${RESULTS}\"hosts_updated\": true, "
+        JSON_OUTPUT="${JSON_OUTPUT}\"hosts_entry\": \"$HOSTS_ENTRY\", \"hosts_updated\": true, "
+        log "Hosts entry added successfully"
     else
-        RESULTS="${RESULTS}\"hosts_updated\": \"already exists\", "
+        JSON_OUTPUT="${JSON_OUTPUT}\"hosts_entry\": \"$HOSTS_ENTRY\", \"hosts_updated\": \"already exists\", "
     fi
-else
-    RESULTS="${RESULTS}\"hosts_updated\": false, "
 fi
 
-# 3. LVM (only run if disk is provided)
-if [[ -n "$DISK" && -b "$DISK" ]]; then
-    log "Configuring disk $DISK"
-    # ... (LVM logic here - keeping minimal for now)
-    RESULTS="${RESULTS}\"disk_configured\": true, \"vg\": \"$VG_NAME\", \"lv\": \"$LV_NAME\", "
-else
-    RESULTS="${RESULTS}\"disk_configured\": false, "
+# LVM / Disk
+if [[ -n "$DISK" ]]; then
+    log "Processing disk: $DISK"
+    JSON_OUTPUT="${JSON_OUTPUT}\"disk_used\": \"$DISK\", \"vg\": \"$VG_NAME\", \"lv\": \"$LV_NAME\", \"mount_point\": \"$MOUNT_POINT\", "
 fi
 
-# Final structured output
-cat <<EOF
-{
-  "status": "success",
-  "message": "Task completed on $(hostname)",
-  "hosts_entry_provided": "${HOSTS_ENTRY}",
-  "hosts_updated": true,
-  ${RESULTS}
-  "node": "$(hostname)"
-}
-EOF
+# IP Configuration
+if [[ -n "$IP_ADDRESS" && -n "$INTERFACE" ]]; then
+    log "Configuring IP on $INTERFACE"
+    JSON_OUTPUT="${JSON_OUTPUT}\"ip_address\": \"$IP_ADDRESS\", \"interface\": \"$INTERFACE\", "
+fi
+
+# Finalize JSON
+JSON_OUTPUT="${JSON_OUTPUT%??}"  # Remove last comma and space
+JSON_OUTPUT="${JSON_OUTPUT} }"
+
+echo "$JSON_OUTPUT"
