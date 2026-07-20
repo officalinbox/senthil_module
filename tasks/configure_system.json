@@ -1,6 +1,6 @@
 {
   "name": "your_module::configure_system",
-  "description": "RHEL 8/9 - Package, LVM, Mount, chown/chmod, IP, hosts with real output",
+  "description": "RHEL 8/9 System Configuration Task - Package, LVM, Mount, chown, hosts, IP",
   "input_method": "environment",
   "parameters": {
     "package": {
@@ -8,43 +8,31 @@
       "type": "Optional[String]"
     },
     "disk": {
-      "description": "Disk for LVM (e.g. /dev/sdb)",
-      "type": "Optional[String]"
-    },
-    "vg_name": {
-      "description": "Volume Group name",
-      "type": "Optional[String]"
-    },
-    "lv_name": {
-      "description": "Logical Volume name",
+      "description": "Disk device for LVM (e.g. /dev/sdb)",
       "type": "Optional[String]"
     },
     "mount_point": {
-      "description": "Mount point (e.g. /data)",
-      "type": "Optional[String]"
-    },
-    "fs_type": {
-      "description": "Filesystem type (xfs or ext4)",
+      "description": "Mount point directory (e.g. /data)",
       "type": "Optional[String]"
     },
     "chown": {
-      "description": "Owner:Group (e.g. root:root, appuser:apps)",
+      "description": "Owner in user:group format (e.g. root:root or appuser:apps)",
       "type": "Optional[String]"
     },
     "permissions": {
-      "description": "Permissions (e.g. 755, 775)",
+      "description": "Permissions (e.g. 755, 775, 700)",
       "type": "Optional[String]"
     },
     "ip_address": {
-      "description": "Static IP (e.g. 192.168.10.50/24)",
+      "description": "Static IP address with prefix (e.g. 192.168.10.50/24)",
       "type": "Optional[String]"
     },
     "interface": {
-      "description": "Network interface (e.g. ens18)",
+      "description": "Network interface name (e.g. ens18)",
       "type": "Optional[String]"
     },
     "hosts_entry": {
-      "description": "Line to add in /etc/hosts",
+      "description": "Line to add in /etc/hosts (e.g. 192.168.1.100 myserver)",
       "type": "Optional[String]"
     }
   }
