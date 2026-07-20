@@ -1,0 +1,51 @@
+{
+  "name": "your_module::configure_system",
+  "description": "Configure LVM, filesystem, network, hosts, fstab on RHEL 8/9",
+  "input_method": "environment",
+  "parameters": {
+    "package": {
+      "description": "Package to install (optional)",
+      "type": "Optional[String]"
+    },
+    "disk": {
+      "description": "Disk to use for LVM (e.g. /dev/sdb)",
+      "type": "Optional[String]"
+    },
+    "vg_name": {
+      "description": "Volume Group name",
+      "type": "String",
+      "default": "datavg"
+    },
+    "lv_name": {
+      "description": "Logical Volume name",
+      "type": "String",
+      "default": "datalv"
+    },
+    "mount_point": {
+      "description": "Mount point",
+      "type": "String",
+      "default": "/data"
+    },
+    "fs_type": {
+      "description": "Filesystem type (xfs or ext4)",
+      "type": "String",
+      "default": "xfs"
+    },
+    "ip_address": {
+      "description": "Static IP address with CIDR (e.g. 192.168.10.50/24)",
+      "type": "Optional[String]"
+    },
+    "gateway": {
+      "description": "Gateway IP",
+      "type": "Optional[String]"
+    },
+    "interface": {
+      "description": "Network interface name (e.g. ens18)",
+      "type": "Optional[String]"
+    },
+    "hosts_entry": {
+      "description": "Line to append to /etc/hosts",
+      "type": "Optional[String]"
+    }
+  }
+}
