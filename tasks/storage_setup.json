@@ -1,10 +1,10 @@
 {
-  "description": "Performs storage provisioning, mounts, packages, and host configuration for RHEL 8/9",
+  "description": "Performs storage provisioning, mounts, packages, permissions, and host configuration for RHEL 8/9",
   "input_method": "environment",
   "parameters": {
     "action_type": {
       "type": "Enum['create_storage', 'extend_lv', 'generic']",
-      "description": "Task mode: 'create_storage' (sequential flow), 'extend_lv' (LVM resize), or 'generic' (runs individual items based on passed parameters)"
+      "description": "Task mode: 'create_storage' (sequential LVM flow), 'extend_lv' (LVM resize), or 'generic' (runs individual operations based on parameters)"
     },
     "pv_device": {
       "type": "Optional[String]",
@@ -20,7 +20,7 @@
     },
     "lv_size": {
       "type": "Optional[String]",
-      "description": "Size for creation or extension (e.g. 5G or +2G)"
+      "description": "Size for creation or extension as String (e.g. '5G', '+2G', '100%FREE')"
     },
     "fstype": {
       "type": "Optional[String]",
@@ -28,7 +28,7 @@
     },
     "mount_path": {
       "type": "Optional[String]",
-      "description": "Mount point path (e.g. /data)"
+      "description": "Target mount point, directory, or file path (e.g. /var/tmp/test)"
     },
     "do_umount": {
       "type": "Optional[Boolean]",
@@ -48,11 +48,11 @@
     },
     "file_owner": {
       "type": "Optional[String]",
-      "description": "Owner for mount_path or target directory/file"
+      "description": "Owner for target directory/file"
     },
     "file_group": {
       "type": "Optional[String]",
-      "description": "Group for mount_path or target directory/file"
+      "description": "Group for target directory/file"
     },
     "file_mode": {
       "type": "Optional[String]",

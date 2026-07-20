@@ -4,7 +4,7 @@
 # Action Types:
 #   1. create_storage : Full sequential setup (PV -> VG -> LV -> Format -> Mount)
 #   2. extend_lv      : Extends existing LV and expands filesystem
-#   3. generic        : Flexible execution of individual commands based on parameters
+#   3. generic        : Flexible execution of individual operations based on parameters
 # ==============================================================================
 
 set -eo pipefail
@@ -77,7 +77,7 @@ if [[ "$PT_action_type" == "create_storage" ]]; then
         mkfs -t "$FSTYPE" "/dev/mapper/${PT_vg_name}-${PT_lv_name}"
     fi
 
-    if [[ ! -d "$PT_mount_path" ]]; then
+    if [[ ! -e "$PT_mount_path" ]]; then
         echo "--> Creating directory: $PT_mount_path"
         mkdir -p "$PT_mount_path"
     fi
@@ -134,7 +134,7 @@ if [[ "$PT_action_type" == "generic" ]]; then
         fi
     fi
 
-    if [[ -n "$PT_vg_name" && -n "$PT_lv_name" && -n "$PT_lv_size" && "$PT_action_type" == "generic" ]]; then
+    if [[ -n "$PT_vg_name" && -n "$PT_lv_name" && -n "$PT_lv_size" ]]; then
         LV_PATH="/dev/mapper/${PT_vg_name}-${PT_lv_name}"
         if ! lvs "$LV_PATH" &>/dev/null; then
             echo "--> Creating LV: $PT_lv_name ($PT_lv_size)"
@@ -148,10 +148,12 @@ if [[ "$PT_action_type" == "generic" ]]; then
         fi
     fi
 
-    # 2. Directory Creation (mkdir)
-    if [[ -n "$PT_mount_path" && ! -d "$PT_mount_path" ]]; then
+    # 2. Directory Creation (mkdir) - Only executes if path does NOT exist at all
+    if [[ -n "$PT_mount_path" && ! -e "$PT_mount_path" ]]; then
         echo "--> Creating Directory (mkdir): $PT_mount_path"
         mkdir -p "$PT_mount_path"
+    elif [[ -n "$PT_mount_path" && -e "$PT_mount_path" ]]; then
+        echo "--> Path $PT_mount_path already exists, skipping mkdir."
     fi
 
     # 3. Add /etc/fstab Entry
@@ -191,7 +193,7 @@ if [[ "$PT_action_type" == "generic" ]]; then
 fi
 
 # ==============================================================================
-# Shared / Standalone Tasks (Execute across modes if parameters are supplied)
+# Shared / Standalone Tasks (Executes across modes if parameters are supplied)
 # ==============================================================================
 
 # Package Install
@@ -210,8 +212,8 @@ if [[ -n "$PT_hosts_entry" ]]; then
     fi
 fi
 
-# Directory Ownership and Permissions
-if [[ -n "$PT_mount_path" && -d "$PT_mount_path" ]]; then
+# File / Directory Ownership and Permissions (Uses -e to support files and directories)
+if [[ -n "$PT_mount_path" && -e "$PT_mount_path" ]]; then
     if [[ -n "$PT_file_owner" || -n "$PT_file_group" ]]; then
         OWNER="${PT_file_owner:-root}"
         GROUP="${PT_file_group:-root}"
