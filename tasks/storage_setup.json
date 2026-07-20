@@ -1,0 +1,54 @@
+{
+  "description": "Performs storage provisioning, mounts, packages, and host configuration for RHEL 8/9",
+  "input_method": "environment",
+  "parameters": {
+    "pv_device": {
+      "type": "Optional[String]",
+      "description": "Disk device for PV (e.g. /dev/sdb)"
+    },
+    "vg_name": {
+      "type": "Optional[String]",
+      "description": "Name of the Volume Group"
+    },
+    "lv_name": {
+      "type": "Optional[String]",
+      "description": "Name of the Logical Volume"
+    },
+    "lv_size": {
+      "type": "Optional[String]",
+      "description": "Size for creation or extension (e.g. 5G or +2G)"
+    },
+    "action_type": {
+      "type": "Enum['create_storage', 'extend_lv']",
+      "description": "Storage action: create_storage or extend_lv"
+    },
+    "fstype": {
+      "type": "Optional[String]",
+      "description": "Filesystem type (default: xfs)"
+    },
+    "mount_path": {
+      "type": "Optional[String]",
+      "description": "Mount point path (e.g. /data)"
+    },
+    "file_owner": {
+      "type": "Optional[String]",
+      "description": "Owner for the target directory/file"
+    },
+    "file_group": {
+      "type": "Optional[String]",
+      "description": "Group for the target directory/file"
+    },
+    "file_mode": {
+      "type": "Optional[String]",
+      "description": "Permissions mode (e.g. 0755)"
+    },
+    "hosts_entry": {
+      "type": "Optional[String]",
+      "description": "Host entry line to append to /etc/hosts (e.g. '192.168.1.50 server1.example.com')"
+    },
+    "package_name": {
+      "type": "Optional[String]",
+      "description": "Package to install via dnf/yum"
+    }
+  }
+}
