@@ -1,50 +1,46 @@
 {
   "name": "your_module::configure_system",
-  "description": "Configure LVM, filesystem, network, hosts, fstab on RHEL 8/9",
+  "description": "RHEL 8/9 - Package, LVM, Filesystem, IP, Hosts, fstab configuration",
   "input_method": "environment",
   "parameters": {
     "package": {
-      "description": "Package to install (optional)",
+      "description": "Package to install (e.g. httpd, nfs-utils)",
       "type": "Optional[String]"
     },
     "disk": {
-      "description": "Disk to use for LVM (e.g. /dev/sdb)",
+      "description": "Disk device for LVM (e.g. /dev/sdb)",
       "type": "Optional[String]"
     },
     "vg_name": {
       "description": "Volume Group name",
-      "type": "String",
-      "default": "datavg"
+      "type": "Optional[String]"
     },
     "lv_name": {
       "description": "Logical Volume name",
-      "type": "String",
-      "default": "datalv"
+      "type": "Optional[String]"
     },
     "mount_point": {
-      "description": "Mount point",
-      "type": "String",
-      "default": "/data"
+      "description": "Mount point for new filesystem (e.g. /data)",
+      "type": "Optional[String]"
     },
     "fs_type": {
-      "description": "Filesystem type (xfs or ext4)",
-      "type": "String",
-      "default": "xfs"
+      "description": "Filesystem type - xfs or ext4",
+      "type": "Optional[String]"
     },
     "ip_address": {
-      "description": "Static IP address with CIDR (e.g. 192.168.10.50/24)",
+      "description": "Static IP with prefix (e.g. 192.168.10.50/24)",
       "type": "Optional[String]"
     },
     "gateway": {
-      "description": "Gateway IP",
+      "description": "Gateway IP address",
       "type": "Optional[String]"
     },
     "interface": {
-      "description": "Network interface name (e.g. ens18)",
+      "description": "Network interface (e.g. ens18, eth0)",
       "type": "Optional[String]"
     },
     "hosts_entry": {
-      "description": "Line to append to /etc/hosts",
+      "description": "Line to add in /etc/hosts (e.g. 192.168.1.100 myserver)",
       "type": "Optional[String]"
     }
   }
