@@ -1,39 +1,15 @@
 {
   "name": "your_module::configure_system",
-  "description": "RHEL 8/9 Simple Configuration Task",
+  "description": "RHEL 8/9 Multi-Action Configuration Task",
   "input_method": "environment",
   "parameters": {
-    "package": {
-      "description": "Package to install",
-      "type": "Optional[String]"
-    },
-    "disk": {
-      "description": "Disk for LVM (e.g. /dev/sdb)",
-      "type": "Optional[String]"
-    },
-    "mount_point": {
-      "description": "Mount point (e.g. /data)",
-      "type": "Optional[String]"
-    },
-    "chown": {
-      "description": "user:group (e.g. root:root)",
-      "type": "Optional[String]"
-    },
-    "permissions": {
-      "description": "Permissions (e.g. 755)",
-      "type": "Optional[String]"
-    },
-    "ip_address": {
-      "description": "Static IP (e.g. 192.168.1.100/24)",
-      "type": "Optional[String]"
-    },
-    "interface": {
-      "description": "Network interface",
-      "type": "Optional[String]"
-    },
-    "hosts_entry": {
-      "description": "Line to add in /etc/hosts",
-      "type": "Optional[String]"
-    }
+    "package": { "description": "Package to install", "type": "Optional[String]" },
+    "disk": { "description": "Disk for LVM (e.g. /dev/sdb)", "type": "Optional[String]" },
+    "mount_point": { "description": "Mount point (e.g. /data)", "type": "Optional[String]" },
+    "chown": { "description": "user:group", "type": "Optional[String]" },
+    "permissions": { "description": "Permissions (e.g. 755)", "type": "Optional[String]" },
+    "ip_address": { "description": "Static IP", "type": "Optional[String]" },
+    "interface": { "description": "Network interface", "type": "Optional[String]" },
+    "hosts_entry": { "description": "Line to add in /etc/hosts", "type": "Optional[String]" }
   }
 }

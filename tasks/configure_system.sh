@@ -1,5 +1,5 @@
 #!/bin/bash
-# Compact Single Line JSON Output
+# Multi-Action Support + Compact Output
 
 set -euo pipefail
 
@@ -13,7 +13,7 @@ IP_ADDRESS="${PT_ip_address:-}"
 INTERFACE="${PT_interface:-}"
 HOSTS_ENTRY="${PT_hosts_entry:-}"
 
-# Execute actions
+# === Execute All Supplied Actions ===
 if [[ -n "$PACKAGE" ]]; then
     dnf install -y "$PACKAGE" || yum install -y "$PACKAGE"
 fi
@@ -27,20 +27,35 @@ fi
 if [[ -n "$DISK" && -b "$DISK" ]]; then
     VG_NAME="datavg"
     LV_NAME="datalv"
+
     pvcreate -y "$DISK" 2>/dev/null || true
     vgcreate -y "$VG_NAME" "$DISK" 2>/dev/null || vgextend "$VG_NAME" "$DISK" 2>/dev/null || true
     lvcreate -y -l 100%FREE -n "$LV_NAME" "$VG_NAME" 2>/dev/null || true
 
     LV_PATH="/dev/$VG_NAME/$LV_NAME"
     mkdir -p "$MOUNT_POINT"
+    mkfs.xfs -f "$LV_PATH" 2>/dev/null || true
+
     mount "$LV_PATH" "$MOUNT_POINT" 2>/dev/null || true
     chown -R "$CHOWN" "$MOUNT_POINT" 2>/dev/null || true
     chmod -R "$PERMISSIONS" "$MOUNT_POINT" 2>/dev/null || true
+
+    UUID=$(blkid -s UUID -o value "$LV_PATH" 2>/dev/null || echo "")
+    if [[ -n "$UUID" ]] && ! grep -q "$MOUNT_POINT" /etc/fstab; then
+        echo "UUID=$UUID $MOUNT_POINT xfs defaults 0 0" >> /etc/fstab
+    fi
+
+    systemctl daemon-reload
+    mount -a 2>/dev/null || true
 fi
 
-# Compact Single Line Output
+# Compact Output
 if [[ -n "$HOSTS_ENTRY" ]]; then
     echo "{\"status\": \"success\", \"message\": \"Task completed on $(hostname)\", \"hosts_entry\": \"$HOSTS_ENTRY\", \"hosts_updated\": true }"
+elif [[ -n "$DISK" ]]; then
+    echo "{\"status\": \"success\", \"message\": \"Task completed on $(hostname)\", \"disk_configured\": true, \"mount_point\": \"$MOUNT_POINT\" }"
+elif [[ -n "$PACKAGE" ]]; then
+    echo "{\"status\": \"success\", \"message\": \"Task completed on $(hostname)\", \"package_installed\": true }"
 else
     echo "{\"status\": \"success\", \"message\": \"Task completed on $(hostname)\" }"
 fi
