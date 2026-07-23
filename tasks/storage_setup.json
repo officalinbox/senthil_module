@@ -1,70 +1,100 @@
 {
-  "description": "Performs storage provisioning, mounts, packages, permissions, and host configuration for RHEL 8/9",
+  "name": "storage_setup",
+  "description": "RHEL 8 / RHEL 9 LVM Storage Management Task - Create, Extend, or Generic operations with real-time output",
   "input_method": "environment",
   "parameters": {
     "action_type": {
-      "type": "Enum['create_storage', 'extend_lv', 'generic']",
-      "description": "Task mode: 'create_storage' (sequential LVM flow), 'extend_lv' (LVM resize), or 'generic' (runs individual operations based on parameters)"
+      "description": "Type of storage operation to perform",
+      "type": "Enum[create_storage, extend_lv, generic]",
+      "required": true
     },
     "pv_device": {
-      "type": "Optional[String]",
-      "description": "Disk device for PV (e.g. /dev/sdb)"
+      "description": "Physical Volume device (e.g. /dev/sdb)",
+      "type": "Optional[String]"
     },
     "vg_name": {
-      "type": "Optional[String]",
-      "description": "Name of the Volume Group"
+      "description": "Volume Group name",
+      "type": "Optional[String]"
     },
     "lv_name": {
-      "type": "Optional[String]",
-      "description": "Name of the Logical Volume"
+      "description": "Logical Volume name",
+      "type": "Optional[String]"
     },
     "lv_size": {
-      "type": "Optional[String]",
-      "description": "Size for creation or extension as String (e.g. '5G', '+2G', '100%FREE')"
-    },
-    "fstype": {
-      "type": "Optional[String]",
-      "description": "Filesystem type (default: xfs)"
+      "description": "Logical Volume size (e.g. 50G, +20G)",
+      "type": "Optional[String]"
     },
     "mount_path": {
-      "type": "Optional[String]",
-      "description": "Target mount point, directory, or file path (e.g. /var/tmp/test)"
+      "description": "Mount point path (e.g. /data)",
+      "type": "Optional[String]"
     },
-    "do_umount": {
-      "type": "Optional[Boolean]",
-      "description": "If true, unmounts mount_path (generic mode)"
-    },
-    "do_mount_all": {
-      "type": "Optional[Boolean]",
-      "description": "If true, runs mount -a (generic mode)"
-    },
-    "do_daemon_reload": {
-      "type": "Optional[Boolean]",
-      "description": "If true, runs systemctl daemon-reload (generic mode)"
-    },
-    "add_fstab_entry": {
-      "type": "Optional[Boolean]",
-      "description": "If true, adds /etc/fstab entry using vg_name, lv_name, mount_path, and fstype (generic mode)"
-    },
-    "file_owner": {
-      "type": "Optional[String]",
-      "description": "Owner for target directory/file"
-    },
-    "file_group": {
-      "type": "Optional[String]",
-      "description": "Group for target directory/file"
-    },
-    "file_mode": {
-      "type": "Optional[String]",
-      "description": "Permissions mode as String (e.g. '0755')"
-    },
-    "hosts_entry": {
-      "type": "Optional[String]",
-      "description": "Host entry line to append to /etc/hosts (e.g. '192.168.1.50 server1.example.com')"
+    "fstype": {
+      "description": "Filesystem type (default: ext4)",
+      "type": "Optional[Enum[xfs, ext4]]",
+      "default": "ext4"
     },
     "package_name": {
-      "type": "Optional[String]",
-      "description": "Package to install via dnf/yum"
+      "description": "Package to install via dnf",
+      "type": "Optional[String]"
+    },
+    "file_owner": {
+      "description": "Owner for mount path",
+      "type": "Optional[String]"
+    },
+    "file_group": {
+      "description": "Group for mount path",
+      "type": "Optional[String]"
+    },
+    "file_mode": {
+      "description": "Permissions for mount path (e.g. 0755)",
+      "type": "Optional[String]"
+    },
+    "add_fstab_entry": {
+      "description": "Add entry to /etc/fstab",
+      "type": "Optional[Boolean]",
+      "default": false
+    },
+    "do_daemon_reload": {
+      "description": "Run systemctl daemon-reload",
+      "type": "Optional[Boolean]",
+      "default": false
+    },
+    "do_mount_all": {
+      "description": "Run mount -a",
+      "type": "Optional[Boolean]",
+      "default": false
+    },
+    "do_umount": {
+      "description": "Unmount the mount_path",
+      "type": "Optional[Boolean]",
+      "default": false
+    },
+    "hosts_entry": {
+      "description": "Line to add to /etc/hosts",
+      "type": "Optional[String]"
     }
-  }
+  },
+  "examples": [
+    {
+      "description": "Create new storage with ext4",
+      "params": {
+        "action_type": "create_storage",
+        "pv_device": "/dev/sdb",
+        "vg_name": "datavg",
+        "lv_name": "datalv",
+        "lv_size": "100G",
+        "mount_path": "/data"
+      }
+    },
+    {
+      "description": "Extend existing Logical Volume",
+      "params": {
+        "action_type": "extend_lv",
+        "vg_name": "datavg",
+        "lv_name": "datalv",
+        "lv_size": "+50G",
+        "mount_path": "/data"
+      }
+    }
+  ]
 }
