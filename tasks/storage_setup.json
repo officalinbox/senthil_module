@@ -1,31 +1,31 @@
 {
   "name": "storage_setup",
-  "description": "RHEL 8 / RHEL 9 LVM Storage Management - Create, Extend storage with real-time console output. Supports dynamic hostname in names.",
+  "description": "RHEL LVM Storage Management Task - Create, Extend, and Generic operations with real-time output",
   "input_method": "environment",
   "parameters": {
     "action_type": {
-      "description": "Operation type to perform",
+      "description": "Type of operation",
       "type": "Enum[create_storage, extend_lv, generic]",
       "required": true
     },
     "pv_device": {
-      "description": "Physical device for PV (e.g. /dev/sdb, /dev/nvme1n1)",
+      "description": "Raw disk for PV (e.g. /dev/sdb)",
       "type": "Optional[String]"
     },
     "vg_name": {
-      "description": "Volume Group name. Supports $(hostname) or ${HOSTNAME} (e.g. $(hostname)_appvg)",
+      "description": "Volume Group name. Supports $(hostname) (e.g. $(hostname)_appvg)",
       "type": "Optional[String]"
     },
     "lv_name": {
-      "description": "Logical Volume name. Supports $(hostname) (e.g. $(hostname)_data)",
+      "description": "Logical Volume name",
       "type": "Optional[String]"
     },
     "lv_size": {
-      "description": "Size of LV (e.g. 50G, 100G, +20G for extend)",
+      "description": "LV size (e.g. 50G, +20G)",
       "type": "Optional[String]"
     },
     "mount_path": {
-      "description": "Mount point directory (e.g. /app, /data)",
+      "description": "Mount directory (e.g. /app/test)",
       "type": "Optional[String]"
     },
     "fstype": {
@@ -33,70 +33,32 @@
       "type": "Optional[Enum[ext4, xfs]]",
       "default": "ext4"
     },
-    "package_name": {
-      "description": "Additional package to install (e.g. lvm2, xfsprogs)",
-      "type": "Optional[String]"
-    },
     "file_owner": {
-      "description": "Owner of the mount directory",
-      "type": "Optional[String]",
-      "default": "root"
+      "description": "Owner for mount_path (generic mode)",
+      "type": "Optional[String]"
     },
     "file_group": {
-      "description": "Group of the mount directory",
-      "type": "Optional[String]",
-      "default": "root"
-    },
-    "file_mode": {
-      "description": "Permissions for mount directory (e.g. 0755, 0770)",
+      "description": "Group for mount_path (generic mode)",
       "type": "Optional[String]"
     },
-    "add_fstab_entry": {
-      "description": "Add entry to /etc/fstab",
-      "type": "Optional[Boolean]",
-      "default": false
+    "file_mode": {
+      "description": "Permissions for mount_path (e.g. 0777)",
+      "type": "Optional[String]"
     },
-    "do_daemon_reload": {
-      "description": "Execute systemctl daemon-reload",
-      "type": "Optional[Boolean]",
-      "default": false
-    },
-    "do_mount_all": {
-      "description": "Execute mount -a",
-      "type": "Optional[Boolean]",
-      "default": false
-    },
-    "do_umount": {
-      "description": "Unmount the target mount_path before operation",
-      "type": "Optional[Boolean]",
-      "default": false
-    },
-    "hosts_entry": {
-      "description": "Optional line to append to /etc/hosts",
+    "package_name": {
+      "description": "Package to install",
       "type": "Optional[String]"
     }
   },
   "examples": [
     {
-      "description": "Create storage with dynamic hostname",
+      "description": "Generic mode - Change ownership and permissions",
       "params": {
-        "action_type": "create_storage",
-        "pv_device": "/dev/sdb",
-        "vg_name": "$(hostname)_appvg",
-        "lv_name": "data",
-        "lv_size": "100G",
-        "mount_path": "/app",
-        "fstype": "ext4"
-      }
-    },
-    {
-      "description": "Extend existing volume",
-      "params": {
-        "action_type": "extend_lv",
-        "vg_name": "$(hostname)_appvg",
-        "lv_name": "data",
-        "lv_size": "+50G",
-        "mount_path": "/app"
+        "action_type": "generic",
+        "mount_path": "/app/test",
+        "file_owner": "admin",
+        "file_group": "admingrp",
+        "file_mode": "0777"
       }
     }
   ]
